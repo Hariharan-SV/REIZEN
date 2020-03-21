@@ -9,10 +9,13 @@ from flask import Flask,request,render_template
 from flask import Markup,flash,session,redirect,url_for
 from flask_session import Session
 import mysql.connector
-#from dotenv import load_env
+from runenv import load_env
 import os
-#load_env()
+load_env()
 user= os.environ.get('user')
+host= os.environ.get('host')
+passwd= os.environ.get('passwd')
+database= os.environ.get('database')
 
 SESSION_TYPE = 'memcache'
 
@@ -36,7 +39,7 @@ def updatetable():
       username=details['user']
       passwd=details['pass']
       retypepass=details['retype-pass']
-      mydb = mysql.connector.connect(host="remotemysql.com",user="k6AZiWpExk",passwd="fvWTyF1pbV",database="k6AZiWpExk")
+      mydb = mysql.connector.connect(host,user,passwd,database)
       mycursor = mydb.cursor()
       mycursor.execute("SELECT name from users WHERE name =%s", (username,))
       checker=mycursor.fetchone()
@@ -63,7 +66,7 @@ def checktable():
       details=request.form
       username=details['user']
       passwd=details['pass']
-      mydb = mysql.connector.connect(host="remotemysql.com",user="k6AZiWpExk",passwd="fvWTyF1pbV",database="k6AZiWpExk")
+      mydb = mysql.connector.connect(host,user,passwd,database)
       mycursor = mydb.cursor()
       mycursor.execute("SELECT name from users WHERE name =%s", (username,))
       checker=mycursor.fetchone()
@@ -79,8 +82,12 @@ def checktable():
       else:
          return 'Login Failed'
 
+@app.errorhandler(404)
+def resource_not_found(e):
+   return redirect(url_for('login'))
+
 if __name__ == '__main__':
-   app.secret_key = 'super secret key'
+   app.secret_key = os.environ.get('secret_key')
    app.config['SESSION_TYPE'] = 'filesystem'
    sess.init_app(app)
-   app.run(debug=True,port=3000)
+   app.run(debug=True)
