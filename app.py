@@ -37,7 +37,7 @@ def updatetable():
    if(request.method == "POST"):
       details=request.form
       username=details['user']
-      passwd=details['pass']
+      password=details['pass']
       retypepass=details['retype-pass']
       mydb = mysql.connector.connect(host,user,passwd,database)
       mycursor = mydb.cursor()
@@ -47,7 +47,7 @@ def updatetable():
          message = Markup("<p>Sorry that name is already taken !</p>")
          flash(message)
          return redirect(url_for('signup'))
-      if(passwd==retypepass):
+      if(password==retypepass):
          mycursor.execute("INSERT INTO users(name,password) VALUES (%s, %s)", (username, passwd))
          mydb.commit()
          mycursor.close()
@@ -65,7 +65,7 @@ def checktable():
    if(request.method == "POST"):
       details=request.form
       username=details['user']
-      passwd=details['pass']
+      password=details['pass']
       mydb = mysql.connector.connect(host,user,passwd,database)
       mycursor = mydb.cursor()
       mycursor.execute("SELECT name from users WHERE name =%s", (username,))
@@ -77,7 +77,7 @@ def checktable():
       mycursor.execute("SELECT password from users WHERE name =%s", (username,))
       checker=mycursor.fetchone()[0]
       mycursor.close()
-      if(checker==passwd):
+      if(checker==password):
          return 'Login Success'
       else:
          return 'Login Failed'
