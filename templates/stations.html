@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
+</head>
+<body>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <table>
+                    <h1>The pickup station</h1>
+                    <form action="/start_station" method="post">
+                    <br/>
+                    <label for="station"><br>Choose your pickup station:</br></label>
+
+                    <select id="station" name="station" />
+                    <option value="Airport">Airport</option>
+                    <option value="Annastatue">Annastatue</option>
+                    <option value="Ashokapuram">Ashokapuram</option>
+                    <option value="Chinnavedampatti">Chinnavedampatti</option>
+                    <option value="Coimbatorenorth">Coimbatorenorth</option>
+                    <option value="Fivecorner">Fivecorner</option>
+                    <option value="Ganapathy">Ganapathy</option>
+                    <option value="ganapathypudhur">ganapathypudhur</option>
+                    <option value="gandhipark">gandhipark</option>
+                    <option value="gandhipuram">gandhipuram</option>
+                    <option value="gks">gks</option>
+                    <option value="hopes">hopes</option>
+                    <option value="koundampalayam">koundampalayam</option>
+                    <option value="kumarasamyavanue">kumarasamyavanue</option>
+                    <option value="kurudampalayam">kurudampalayam</option>
+                    <option value="lakshmimills">lakshmimills</option>
+                    <option value="neelambur">neelambur</option>
+                    <option value="neelikonampalayam">neelikonampalayam</option>
+                    <option value="ondiputhur">ondiputhur</option>
+                    <option value="peelamedu">peelamedu</option>
+                    <option value="railwaystation">railwaystation</option>
+                    <option value="ramanathapuram">ramanathapuram</option>
+                    <option value="rspuram">rspuram</option>
+                    <option value="saibabacolony">saibabacolony</option>
+                    <option value="saravanampatti">saravanampatti</option>
+                    <option value="singanallur">singanallur</option>
+                    <option value="sivanandhacolony">sivanandhacolony</option>
+                    <option value="thudiyalur">thudiyalur</option>
+                    <option value="ukkadam">ukkadam</option>
+                    <option value="womenspolytechnic">womenspolytechnic</option>
+                    <option value="hopes">hopes</option>
+                    </select>
+                    <!--input type = "submit" value = "submit"/-->
+                    <div class="container-login100-form-btn">
+						<button class="login100-form-btn">
+							Submit
+						</button>
+					</div>
+                </form>
+                </table>
+            </div>
+        </div>
+    </div>
+  
+</body>
+</html>

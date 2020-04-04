@@ -16,7 +16,12 @@ user= os.environ.get('user')
 host= os.environ.get('host')
 passwd= os.environ.get('passwd')
 database= os.environ.get('database')
-
+config={
+   'user':user,
+   'host':host,
+   'passwd':passwd,
+   'database':database,   
+}
 SESSION_TYPE = 'memcache'
 
 app=Flask(__name__)
@@ -39,7 +44,7 @@ def updatetable():
       username=details['user']
       password=details['pass']
       retypepass=details['retype-pass']
-      mydb = mysql.connector.connect(host,user,passwd,database)
+      mydb = mysql.connector.connect(**config)
       mycursor = mydb.cursor()
       mycursor.execute("SELECT name from users WHERE name =%s", (username,))
       checker=mycursor.fetchone()
@@ -48,7 +53,7 @@ def updatetable():
          flash(message)
          return redirect(url_for('signup'))
       if(password==retypepass):
-         mycursor.execute("INSERT INTO users(name,password) VALUES (%s, %s)", (username, passwd))
+         mycursor.execute("INSERT INTO users(name,password) VALUES (%s, %s)", (username, password))
          mydb.commit()
          mycursor.close()
          message = Markup("<p>Account Created!</p>")
@@ -66,7 +71,7 @@ def checktable():
       details=request.form
       username=details['user']
       password=details['pass']
-      mydb = mysql.connector.connect(host,user,passwd,database)
+      mydb = mysql.connector.connect(**config)
       mycursor = mydb.cursor()
       mycursor.execute("SELECT name from users WHERE name =%s", (username,))
       checker=mycursor.fetchone()
@@ -78,13 +83,34 @@ def checktable():
       checker=mycursor.fetchone()[0]
       mycursor.close()
       if(checker==password):
-         return 'Login Success'
+         return redirect('/pickup_station')
       else:
+         mydb = mysql.connector.connect(**config)
+         mycursor = mydb.cursor()
+         mycursor.execute("SELECT * FROM users")
+         for x in mycursor:
+            print(x)
          return 'Login Failed'
+
+#error?? while running this code... error
+
+@app.route('/start_station',methods=['POST'])
+def stations():
+    if(request.method=='POST'):
+        form=request.form
+        s=form['station']
+        print("Station is ",s)
+        return render_template('startstation.html',name=s)
+
+@app.route('/pickup_station')
+def view():
+    return render_template('stations.html')
 
 @app.errorhandler(404)
 def resource_not_found(e):
    return redirect(url_for('login'))
+
+#now create account
 
 if __name__ == '__main__':
    app.secret_key = os.environ.get('secret_key')
