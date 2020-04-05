@@ -133,6 +133,114 @@ def ridevehicle():
    else:
       return redirect('/login')
 
+@app.route('/agent_login')
+def agent_login():
+   return render_template('agent_login.html')
+
+@app.route('/agent_signup')
+def agent_signup():
+   return render_template('agent_signup.html')   
+
+@app.route('/agent_update', methods=['GET', 'POST'])
+def agent_updatetable():
+   if(request.method == "POST"):
+      details=request.form
+      username=details['user']
+      password=details['pass']
+      s_id=details['s_id']
+      retypepass=details['retype-pass']
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT name from agent WHERE name =%s", (username,))
+      checker=mycursor.fetchone()
+      if(checker!=None and checker[0]==username):
+         message = Markup("<p>Sorry that name is already taken !</p>")
+         flash(message)
+         return redirect(url_for('agent_signup'))
+      if(password==retypepass):
+         mycursor.execute("INSERT INTO agent(name,password) VALUES (%s, %s)", (username, password))
+         mydb.commit()
+         mycursor.close()
+         message = Markup("<p>Account Created!</p>")
+         flash(message)
+         return redirect(url_for('agent_signup'))
+      else:
+         message = Markup("<p>Passwords Mismatch!</p>")
+         flash(message)
+         return redirect(url_for('agent_signup'))
+   return render_template('agent_signup.html')
+
+@app.route('/agent_validate', methods=['POST'])
+def agent_checktable():
+   if(request.method == "POST"):
+      details=request.form
+      username=details['user']
+      password=details['pass']
+      s_id=details['s_id']
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT name from agent WHERE name =%s", (username,))
+      checker=mycursor.fetchone()
+      if(checker==None):
+         message = Markup("<p>Sorry Invalid Username !</p>")
+         flash(message)
+         return redirect(url_for('agent_login'))
+      mycursor.execute("SELECT password from agent WHERE name =%s", (username,))
+      checker=mycursor.fetchone()[0]
+      mycursor.close()
+      if(checker==password):  #need to redirect to something else!
+         return redirect('/agent_per')
+      else:
+         mydb = mysql.connector.connect(**config)
+         mycursor = mydb.cursor()
+         mycursor.execute("SELECT * FROM agent")
+         for x in mycursor:
+            print(x)
+         return 'Login Failed'
+
+@app.route('/agent_per')
+def agentpermission():
+      if(request.method == "POST"):
+         details=request.form
+         username=details['user']
+         password=details['pass']
+         s_id=details['s_id']
+         mydb = mysql.connector.connect(**config)
+         mycursor = mydb.cursor()
+         mycursor.execute("SELECT station_id FROM agent WHERE name =%s AND password =%s",(username,password,))
+         checker=mycursor.fetchone()[0]
+         mycursor.close()
+         if(checker==s_id):
+            mydb = mysql.connector.connect(**config)
+            mycursor = mydb.cursor()
+           # mycursor.execute("SELECT * FROM booking WHERE ",(username,password,))#problem in booking table
+         
+
+@app.route('/payment/<NAME>')
+def payment(NAME):
+   if(request.method == "POST"):
+         details=request.form
+         username=details['user']
+         total_cost=distance * 3 + time * 0.5
+         mydb = mysql.connector.connect(**config)
+         mycursor = mydb.cursor()
+         mycursor.execute("SELECT amount FROM users WHERE name = %s",(username,))
+         checker=mycursor.fetchone()[0]
+         mycursor.close()
+         if(total_cost-checker > 500): #assuming 500 to be minimum balance
+            return redirect('/two_mode')
+         else:
+            return redirect('/one_mode')
+
+@app.route('/two_mode')
+def payment_two_modes():
+      if(request.method == "POST"):
+         details=request.form
+         username=details['user']
+         mydb = mysql.connector.connect(**config)
+         mycursor = mydb.cursor()
+         mycursor.execute("SELECT * FROM ride")
+
 @app.errorhandler(404)
 def resource_not_found(e):
    return redirect(url_for('login'))
