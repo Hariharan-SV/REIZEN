@@ -2,3 +2,5 @@
 flask_session/
 __pycache__/
 tablecreation.py
+Progress.txt
+datasend.py
