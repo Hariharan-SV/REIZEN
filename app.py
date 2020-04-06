@@ -7,12 +7,13 @@ Created on Wed Mar 18 19:04:17 2020
 
 from flask import Flask,request,render_template,make_response
 from flask import Markup,flash,session,redirect,url_for
-# from flask_session import Session
+import time
 import mysql.connector
 from runenv import load_env
 import os
 import ast
 import json
+import random
 load_env()
 
 #config= os.environ.get('config')
@@ -27,6 +28,7 @@ config = {
 'database':database
 }
 
+otp=0
 SESSION_TYPE = 'memcache'
 
 app=Flask(__name__)
@@ -111,7 +113,7 @@ def stations():
         session['station']=s
         mydb = mysql.connector.connect(**config)
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT number_plate,model_name from vehicles WHERE number_plate in (SELECT number_plate from location where station_id=(SELECT station_id from station where station_name=%s))",(s,))
+        mycursor.execute("SELECT number_plate,model_name from vehicles WHERE availabity='YES' AND number_plate in (SELECT number_plate from location where station_id=(SELECT station_id from station where station_name=%s))",(s,))
         result=[]
         for x in mycursor:
            result.append(list(x))
@@ -119,8 +121,28 @@ def stations():
 
 @app.route('/book_process/<np>/<bike>')
 def displaybookedvehicle(np,bike):
-   print("Got ",np," of ",bike)
-   return redirect('/ride')
+   global otp
+   if('station' not in session):
+      return redirect('/bike_select')
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mycursor.execute("SELECT name FROM booking WHERE name=%s",(session['user_id'],))
+   if(mycursor.fetchone() is not None):
+      mycursor.execute("SELECT validity FROM booking WHERE name=%s",(session['user_id'],))
+      validity=mycursor.fetchone()[0]
+      if(validity=="YES"):
+         print("Got ",np," of ",bike)
+         return redirect('/ride')
+      else:
+         mycursor.execute("SELECT otp FROM booking WHERE name=%s",(session['user_id'],))
+         otp=int(mycursor.fetchone()[0])
+         return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp)
+   else:
+      otp=random.randrange(1000,9999,1)
+      time_now=time.strftime('%d/%m/%y %H:%M:%S')
+      mycursor.execute("INSERT INTO booking VALUES(%s,%s,%s,%s,%s,%s)",(session['user_id'],np,otp,time_now,"Single","No",))
+      mydb.commit()
+      return redirect('/book_process/'+np+'/'+bike)
 
 @app.route('/ride')
 def ridevehicle():
