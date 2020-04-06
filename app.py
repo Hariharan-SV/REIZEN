@@ -31,7 +31,6 @@ SESSION_TYPE = 'memcache'
 
 app=Flask(__name__)
 app.static_folder='static'
-# sess = Session()
 
 
 @app.route('/login')
@@ -89,23 +88,10 @@ def checktable():
       mycursor.close()
       if(checker==password):
          resp = make_response(render_template('login.html'))
-         # resp.set_cookie('userID', username)
          session['user_id']=username
-
-         #return resp
          return redirect('/pickup_station')
-         #fvWTyF1pbV
       else:
          return 'Login Failed'
-
-
-@app.route('/start_station',methods=['POST'])
-def stations():
-    if(request.method=='POST'):
-        form=request.form
-        s=form['station']
-        print("Station is ",s)
-        return render_template('startstation.html',name=s)
 
 @app.route('/pickup_station')
 def view():
@@ -114,17 +100,27 @@ def view():
    else:
       return redirect('/login')
 
-@app.route('/book')
-def bookbike():
-   result=[["TN72BJ6087","TVS Scooty"],["TN72AM8262","TVS Star"]]
-   return render_template('vehicles.html',table=result)
 
-@app.route('/book_process/<name>', methods=['POST'])
-def displaybookedvehicle(name):
-   if(request.method == "POST"):
-      print("Before")
-      print("Got ",name)
-      return str(name)
+@app.route('/bike_select',methods=['POST'])
+def stations():
+    if('user_id' not in session):
+       return('Invalid Method')
+    if(request.method=='POST'):
+        form=request.form
+        s=form['station']
+        session['station']=s
+        mydb = mysql.connector.connect(**config)
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT number_plate,model_name from vehicles WHERE number_plate in (SELECT number_plate from location where station_id=(SELECT station_id from station where station_name=%s))",(s,))
+        result=[]
+        for x in mycursor:
+           result.append(list(x))
+        return render_template('vehicles.html',name=s,table=result)
+
+@app.route('/book_process/<np>/<bike>')
+def displaybookedvehicle(np,bike):
+   print("Got ",np," of ",bike)
+   return redirect('/ride')
 
 @app.route('/ride')
 def ridevehicle():
@@ -136,39 +132,6 @@ def ridevehicle():
 @app.route('/agent_login')
 def agent_login():
    return render_template('agent_login.html')
-
-@app.route('/agent_signup')
-def agent_signup():
-   return render_template('agent_signup.html')   
-
-@app.route('/agent_update', methods=['GET', 'POST'])
-def agent_updatetable():
-   if(request.method == "POST"):
-      details=request.form
-      username=details['user']
-      password=details['pass']
-      s_id=details['s_id']
-      retypepass=details['retype-pass']
-      mydb = mysql.connector.connect(**config)
-      mycursor = mydb.cursor()
-      mycursor.execute("SELECT name from agent WHERE name =%s", (username,))
-      checker=mycursor.fetchone()
-      if(checker!=None and checker[0]==username):
-         message = Markup("<p>Sorry that name is already taken !</p>")
-         flash(message)
-         return redirect(url_for('agent_signup'))
-      if(password==retypepass):
-         mycursor.execute("INSERT INTO agent(name,password) VALUES (%s, %s)", (username, password))
-         mydb.commit()
-         mycursor.close()
-         message = Markup("<p>Account Created!</p>")
-         flash(message)
-         return redirect(url_for('agent_signup'))
-      else:
-         message = Markup("<p>Passwords Mismatch!</p>")
-         flash(message)
-         return redirect(url_for('agent_signup'))
-   return render_template('agent_signup.html')
 
 @app.route('/agent_validate', methods=['POST'])
 def agent_checktable():
@@ -186,10 +149,13 @@ def agent_checktable():
          flash(message)
          return redirect(url_for('agent_login'))
       mycursor.execute("SELECT password from agent WHERE name =%s", (username,))
-      checker=mycursor.fetchone()[0]
+      passwordchecker=mycursor.fetchone()[0]
+      mycursor.execute("SELECT station_id from agent WHERE name =%s", (username,))
+      idchecker=mycursor.fetchone()[0]
       mycursor.close()
-      if(checker==password):  #need to redirect to something else!
-         return redirect('/agent_per')
+      if(checker==password and int(idchecker)==int(s_id)):  #need to redirect to something else! :)
+         session['agent']=username
+         return redirect('/agent/requests')
       else:
          mydb = mysql.connector.connect(**config)
          mycursor = mydb.cursor()
@@ -198,26 +164,19 @@ def agent_checktable():
             print(x)
          return 'Login Failed'
 
-@app.route('/agent_per')
-def agentpermission():
-      if(request.method == "POST"):
-         details=request.form
-         username=details['user']
-         password=details['pass']
-         s_id=details['s_id']
-         mydb = mysql.connector.connect(**config)
-         mycursor = mydb.cursor()
-         mycursor.execute("SELECT station_id FROM agent WHERE name =%s AND password =%s",(username,password,))
-         checker=mycursor.fetchone()[0]
-         mycursor.close()
-         if(checker==s_id):
-            mydb = mysql.connector.connect(**config)
-            mycursor = mydb.cursor()
-           # mycursor.execute("SELECT * FROM booking WHERE ",(username,password,))#problem in booking table
+@app.route('/agent/requests')
+def agent_requests():
+   return 'View requests'
+   # agent must view requests in this requests
          
+@app.route('/end_ride/<station>/<distance>/<time>')
+def ending_ride(station,distance,time):
+   time=time[-4:]
+   print(station,distance,time)
+   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=distance,end_station=station,time=time)
 
-@app.route('/payment/<NAME>')
-def payment(NAME):
+@app.route('/payment/<distance>/<time>')
+def payment(distance,time):
    if(request.method == "POST"):
          details=request.form
          username=details['user']
