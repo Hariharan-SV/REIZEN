@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Select bike</title>
+	<title>Select a bike</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -26,6 +26,7 @@
 	<div class="limiter">
 		<div class="container-login100">
 			<div class="wrap-login100">
+                        <h2>Your trip starts at {{name}}</h2>
 				<table>
                               <tr>
                                     <th>Number plate</th>
@@ -82,21 +83,19 @@
             $(".use-address").click(function() {
             var $row = $(this).closest("tr"),           // Finds the closest row <tr> 
                   $tds = $row.find("td"),               // Finds all children <td> elements
-                  $bike = $row.find("td:nth-child(1)").text(), // Finds 2 nd children <td> elements
-                  $np = $row.find("td:nth-child(2)").text();   // Finds 2 nd children <td> elements
+                  $np = $row.find("td:nth-child(1)").text(), // Finds 2 nd children <td> elements
+                  $bike = $row.find("td:nth-child(2)").text();   // Finds 2 nd children <td> elements
                   /*$.each($tds, function() {             // Visits every single <td> element
                   console.log($(this).text());          // Prints out the text within the <td>
                   });*/
                   console.log($bike);
                   console.log($np);
-                  $.ajax({
+                  window.location.replace("http://localhost:2011/book_process/"+$np+"/"+$bike);
+                  /*$.ajax({
                         type : "POST",
-                        url : '/book_process/'+$np,
+                        url : '/book_process/'+$np+'/'+$bike,
                         contentType: 'application/json;charset=UTF-8',
-                        success: function (data) {
-                              console.log(data);
-                        }
-                  });
+                  });*/
             });
       </script>
 </body>

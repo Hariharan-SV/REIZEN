@@ -313,6 +313,7 @@
                             function random(min, max)      { return (min + (Math.random() * (max - min)));            };
                             function randomChoice(choices) { return choices[Math.round(random(0, choices.length-1))]; };
                             var name=document.getElementById("nameofstation").querySelector('.name').innerHTML
+                            name=name.toLowerCase()
                             console.log("name : ",name)
                             var endride=0;
                             var maze = function (X, Y) {
@@ -348,7 +349,7 @@
                                             "coimbatorenorth":[8,4],"koundampalayam":[8,8],"gandhipuram":[10,14],"ganapathy":[10,21],"neelambur":[10,33],"sivanandhacolony":[11,7],"saibabacolony":[12,1],"ganapathypudhur":[12,19],"womenspolytechnic":[14,16],
                                             "rspuram":[16,0],"peelamedu":[16,24],"hopes":[16,30],"lakshmimills":[18,16],"gandhipark":[22,0],"annastatue":[19,10],"airport":[21,32],"railwaystation":[30,8],"fivecorner":[32,1],"ramanathapuram":[19,24],
                                             "neelikonampalayam":[31,37],"ukkadam":[38,1],"singanallur":[38,21],"ondiputhur":[38,30]};
-                                console.log(this.names[name][0])
+
                                 this.moves = 0;
                                 this.Board = new Array(2 * this.N + 1);
                                 this.EL = new Array();
@@ -409,6 +410,7 @@
                                             }
                                         }
                                         x=this.names[name]
+                                        console.log(x)
                                         this.Board[x[1]][x[0]] = '&'
                                         //this.Board[1] = '&';
                                         this.ctx.fillStyle = "#c4192a";
@@ -531,7 +533,7 @@
                                         ans = getKeyByValue(this.names,j,i)
                                         console.log(ans)
                                         if(endride==1){
-                                            modelfunwin();
+                                            window.location.replace("http://localhost:2011/end_ride/"+ans+"/"+this.moves+"/"+$('#timerel').text());          
                                             return 1;
                                         }
                                     }else{
