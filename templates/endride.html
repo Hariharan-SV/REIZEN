@@ -10,12 +10,18 @@
             <div class="wrap-login100">
                 <h1>Username: {{username}}</h1><br>
                 <h1>Start station : {{start_station}}</h1><br>
-                <h1>Distance : {{distance}}</h1><br>
-                <h1>Time : {{time}}</h1><br>
+                <h1 id="distance">Distance : {{distance}}</h1><br>
+                <h1 id="time">Time : {{time}}</h1><br>
                 <h1>End station : {{end_station}}</h1><br>
+                <h1 id="amount">{{amount}}</h1>
+                <button class="login100-form-btn" id="submit">End My Trip</button>
             </div>
         </div>
     </div>
-  
+    <script type="text/javascript">
+    document.getElementById("submit").onclick = function () {
+        location.href = "http://localhost:2011/payment/"+document.getElementById('amount').textContent;
+    };
+</script>
 </body>
 </html>
