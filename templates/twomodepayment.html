@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Proceeding to payment, dear {{name}}</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/favicon.ico') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/animate/animate.css') }}"/>
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/css-hamburgers/hamburgers.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/select2/select2.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/util.css') }}"/>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<table>
+                    <tr>
+                        <td> Pay by Reizen cash </td>
+                        <td>
+                            <button class="login100-form-btn use-address" >Proceed to pay</button>
+                        </td>
+                        <td> Pay by Real cash </td>
+                        <td>
+                            <button class="login100-form-btn use-address1" >Proceed to pay</button>
+                        </td>
+                    </tr>
+                </table>
+			</div>
+		</div>
+	</div>
+	
+	
+
+	
+<!--===============================================================================================-->	
+	<script src="{{ url_for('static', filename='vendor/jquery/jquery-3.2.1.min.js') }}"></script>
+<!--===============================================================================================-->
+	<script src="{{ url_for('static', filename='vendor/bootstrap/js/popper.js') }}"></script>
+	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+<!--===============================================================================================-->
+	<script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
+<!--===============================================================================================-->
+	<script src="{{ url_for('static', filename='vendor/tilt/tilt.jquery.min.js') }}"></script>
+	<script >
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+      <script>
+            $(".use-address").click(function() {
+                    window.location.replace("http://localhost:2011/reduce_reizen_amount")
+            });
+
+            $(".use-address1").click(function() {
+                    window.location.replace("http://localhost:2011/agent_cash") //loosing connectivity here!
+            });
+      </script>
+<!--===============================================================================================-->
+	<script src="{{ url_for('static', filename='js/main.js/') }}"></script>
+      <style>
+            table{
+                  margin-top: 0;
+            }
+            th,td{
+                  padding-left: 5%;
+                  padding-top: 2%;
+                  min-width:200px;
+                  text-align: center;
+            }
+            
+      </style>
+</body>
+</html>
