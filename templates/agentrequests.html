@@ -45,6 +45,9 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    <td>
+                        <button class="login100-form-btn use-address1" >Go Back</button>
+                  </td>
                 </table>
 			</div>
 		</div>
@@ -88,6 +91,9 @@
                   $Username = $row.find("td:nth-child(1)").text();
                   console.log($Username);
                   window.location.replace("http://localhost:2011/update_booking/"+$Username);
+            });
+            $(".use-address1").click(function() {
+                    window.location.replace("http://localhost:2011/agent_main") 
             });
       </script>
 </body>
