@@ -92,9 +92,13 @@ def checktable():
       if(checker==password):
          resp = make_response(render_template('login.html'))
          session['user_id']=username
-         return redirect('/pickup_station')
+         return redirect('/user_main_page')
       else:
          return 'Login Failed'
+
+@app.route('/user_main_page')
+def main_login_page():
+      return render_template('mainloginpage.html',name=session['user_id'] )
 
 @app.route('/pickup_station')
 def view():
@@ -103,6 +107,16 @@ def view():
    else:
       return redirect('/login')
 
+@app.route('/user_history')
+def history():
+      username=session['user_id']
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT trip_id,start_station,end_station,start_time,end_time,amount FROM trip WHERE name=%s AND mode='YES'",(username,))
+      result=[]
+      for x in mycursor:
+         result.append(x)
+      return render_template('gobackpage.html',table=result)
 
 @app.route('/bike_select',methods=['POST'])
 def stations():

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Cash payment</title>
+	<title>Your history, dear {{name}}!</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -27,24 +27,25 @@
 		<div class="container-login100">
 			<div class="wrap-login100">
 				<table>
-                              <tr>
-                                    <th>Trip id</th>
-                                    <th>Name</th>
-                                    <th>Start station</th>
-                                    <th>End station</th>
-                                    <th>Amount</th>
-                              </tr>
-                              {% for t in table %}
-                                  <tr>
-                                  {% for i in t %}
-                                      <td>{{ i }}</td>
-                                  {% endfor %}
-                                  <td>
-                                    <button class="login100-form-btn use-address" >Received</button>
-                                  </td>
-                                  </tr>
-                              {% endfor %}
-                        </table>
+                    <tr>
+                        <th>Trip id</th>
+                        <th>Start Station</th>
+                        <th>End Station</th>
+                        <th>Start time</th>
+                        <th>End time</th>
+                        <th>Amount</th>
+                    </tr>
+                    {% for t in table %}
+                        <tr>
+                            {% for i in t %}
+                            <td>{{ i }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <td>
+                        <button class="login100-form-btn use-address" >Go Back</button>
+                    </td>
+                </table>
 			</div>
 		</div>
 	</div>
@@ -73,7 +74,7 @@
                   margin-top: 0;
             }
             th,td{
-                  padding-left: 2%;
+                  padding-left: 0%;
                   padding-top: 2%;
                   min-width:120px;
                   text-align: center;
@@ -82,11 +83,7 @@
       </style>
       <script>
             $(".use-address").click(function() {
-                var $row = $(this).closest("tr"),           // Finds the closest row <tr> 
-                $tds = $row.find("td"),               // Finds all children <td> elements
-                $tripid = $row.find("td:nth-child(1)").text();
-                console.log($tripid);
-                window.location.replace("http://localhost:2011/agent_end/"+$tripid);
+                    window.location.replace("http://localhost:2011/user_main_page") 
             });
       </script>
 </body>
