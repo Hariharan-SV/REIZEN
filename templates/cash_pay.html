@@ -84,7 +84,7 @@
             $(".use-address").click(function() {
                 var $row = $(this).closest("tr"),           // Finds the closest row <tr> 
                 $tds = $row.find("td"),               // Finds all children <td> elements
-                $tripid = $row.find("td:nth-child(5)").text();
+                $tripid = $row.find("td:nth-child(1)").text();
                 console.log($tripid);
                 window.location.replace("http://localhost:2011/agent_end/"+$tripid);
             });

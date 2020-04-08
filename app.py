@@ -14,6 +14,7 @@ import os
 import ast
 import json
 import random
+import math
 load_env()
 
 #config= os.environ.get('config')
@@ -196,13 +197,24 @@ def agent_requests():
    s=session['agent_station']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
-   mycursor.execute("SELECT * FROM booking WHERE number_plate in (SELECT number_plate FROM location where station_id=%s)",(int(s),))
+   mycursor.execute("SELECT * FROM booking WHERE validity='NO' AND number_plate in (SELECT number_plate FROM location where station_id=%s)",(int(s),))
    result=[]
    for x in mycursor:
       result.append(list(x))
    return render_template('agentrequests.html',table=result)
    #return 'View requests'
    #agent must view requests in this requests
+
+@app.route('/payment_processing')
+def payment_processing():
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mycursor.execute("SELECT * FROM trip WHERE name=%s",(session['user_id'],))
+   data=mycursor.fetchmany()
+   if(data[len(data)-1][-1]=='NO'):
+      return render_template('paymentwaiting.html')
+   else:
+      return render_template('thankyou.html',name=session['user_id'])
 
 @app.route('/update_booking/<username>')
 def update_user_validity(username):
@@ -224,17 +236,9 @@ def update_user_validity(username):
    lat=l1[0]
    longi=l1[1]
    mycursor.execute("SELECT number_plate,time FROM booking WHERE name=%s",(username,))
-   result=[]
-   for x in mycursor:
-      result.append(list(x))
-   try:
-      mycursor.execute("INSERT INTO ride(name,number_plate,start_time,prev_latitude,prev_longitude,status) VALUES (%s,%s,%s,%s,%s,%s) ",(username,result[0],result[1],lat,longi,"NO"))
-      mydb.commit()
-   except:
-      print("Failed")
-   mycursor.execute("SELECT model_name FROM vehicles WHERE number_plate=%s",(result[0][0],))
-   checker=mycursor.fetchone()[0]
-   model=checker
+   result=mycursor.fetchone()
+   mycursor.execute("INSERT INTO ride(name,number_plate,start_time,prev_latitude,prev_longtitude,cur_latitude,cur_longtitude,distance,status) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(username,result[0],result[1],lat,longi,lat,longi,0,"NO",))
+   mydb.commit()
    mycursor.close()
    return redirect('/agent_requests')
 
@@ -249,28 +253,30 @@ def ending_ride(station,distance,time1):
    mycursor.execute("SELECT name,number_plate,start_time from ride where name=%s",(session['user_id'],))
    data=mycursor.fetchone()
    end_time=time.strftime('%d/%m/%y %H:%M:%S')
-   mycursor.execute("INSERT INTO trip(name,number_plate,start_time,end_time,start_station,end_station,distance,amount,mode) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,time1,))
+   mycursor.execute("INSERT INTO trip(name,number_plate,start_time,end_time,start_station,end_station,distance,amount,mode) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,total_cost,"NO",))
+   mydb.commit()
+   mycursor.execute("DELETE FROM ride where name=%s",(session['user_id'],))
    mydb.commit()
    print(station,distance,time1)
    return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=distance,end_station=station,time=time1,amount=total_cost)
 
 @app.route('/payment/<amount>')
 def payment(amount):
-         if('user_id' not in session):
-                return 'Invalid method'
-         else:
-            s=session['user_id']
-            mydb = mysql.connector.connect(**config)
-            mycursor = mydb.cursor()
-            mycursor.execute("SELECT amount FROM users WHERE name = %s",(s,))
-            checker=mycursor.fetchone()[0]
-            mycursor.close()
-            amt=amount[:-2]
-            amt=int(amt)
-            if(int(checker)-amt > 500): #assuming 500 to be minimum balance
-               return redirect('/two_mode')
-            else:
-               return redirect('/one_mode')
+   if('user_id' not in session):
+      return 'Invalid method'
+   else:
+      s=session['user_id']
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT amount FROM users WHERE name = %s",(s,))
+      checker=mycursor.fetchone()[0]
+      mycursor.close()
+      amt=amount[:-2]
+      amt=math.ceil(float(amt))
+      if(int(checker)-amt > 500): #assuming 500 to be minimum balance
+         return redirect('/two_mode')
+      else:
+         return redirect('/one_mode')
 
 @app.route('/two_mode')
 def payment_two_modes():
@@ -298,9 +304,13 @@ def ack_cash():
 @app.route('/agent_end/<tid>')
 def end_user_trip_by_agent(tid):
    mydb=mysql.connector.connect(**config)
-   mycursor=mydb.connect()
-   mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(tid,))
-   return redirect('/agent_requests')
+   mycursor=mydb.cursor()
+   try:
+      mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(int(tid),))
+      mydb.commit()
+   except:
+      print("Failed")
+   return redirect('/agent_cash')
 
 @app.route('/reduce_reizen_amount')
 def reducereizencash():
@@ -319,5 +329,4 @@ def resource_not_found(e):
 if __name__ == '__main__':
    app.secret_key = os.environ.get('secret_key')
    app.config['SESSION_TYPE'] = 'filesystem'
-   # sess.init_app(app)
    app.run(debug=True,port=2011)
