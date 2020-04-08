@@ -109,14 +109,15 @@ def view():
 
 @app.route('/user_history')
 def history():
-      username=session['user_id']
-      mydb = mysql.connector.connect(**config)
-      mycursor = mydb.cursor()
-      mycursor.execute("SELECT trip_id,start_station,end_station,start_time,end_time,amount FROM trip WHERE name=%s AND mode='YES'",(username,))
-      result=[]
-      for x in mycursor:
-         result.append(x)
-      return render_template('gobackpage.html',table=result)
+   username=session['user_id']
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mycursor.execute("SELECT trip_id,start_station,end_station,start_time,end_time,amount FROM trip WHERE name=%s AND mode='YES'",(username,))
+   result=[]
+   for x in mycursor:
+      result.append(x)
+   print(result)
+   return render_template('gobackpage.html',table=result,name=session['user_id'])
 
 @app.route('/bike_select',methods=['POST'])
 def stations():
@@ -151,9 +152,10 @@ def displaybookedvehicle(np,bike):
          mydb.commit()
          return redirect('/ride')
       else:
-         mycursor.execute("SELECT otp FROM booking WHERE name=%s",(session['user_id'],))
+         mycursor.execute("SELECT otp,time FROM booking WHERE name=%s",(session['user_id'],))
          otp=int(mycursor.fetchone()[0])
-         return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp)
+         time=str(mycursor.fetchone()[1])
+         return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp,time=time)
    else:
       otp=random.randrange(1000,9999,1)
       time_now=time.strftime('%d/%m/%y %H:%M:%S')
@@ -196,7 +198,7 @@ def agent_checktable():
       if(passwordchecker.lower()==password.lower() and int(idchecker)==int(s_id)):  #need to redirect to something else! :)
          session['agent']=username
          session['agent_station']=s_id
-         return redirect('/agent_requests')
+         return redirect('/agent_main')
       else:
          mydb = mysql.connector.connect(**config)
          mycursor = mydb.cursor()
@@ -205,6 +207,23 @@ def agent_checktable():
          for x in mycursor:
             print(x)
          return 'Login Failed'
+
+@app.route('/agent_main')
+def agent_mainpage():
+   return render_template('agent_mainpage.html',name=session['agent'])
+
+@app.route('/recharge_cash',methods=['GET','POST'])
+def recharge():
+   if(request.method == 'POST'):
+      details=request.form
+      username=details['user']
+      amount=details['amount']
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("UPDATE users SET amount=amount+%s WHERE name=%s",(int(amount),username,))
+      return render_template('recharge.html')
+   else:
+      return render_template('recharge.html')
 
 @app.route('/agent_requests')
 def agent_requests():
@@ -224,7 +243,8 @@ def payment_processing():
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
    mycursor.execute("SELECT * FROM trip WHERE name=%s",(session['user_id'],))
-   data=mycursor.fetchmany()
+   data=mycursor.fetchall()
+   print("\n\n",data)
    if(data[len(data)-1][-1]=='NO'):
       return render_template('paymentwaiting.html')
    else:
