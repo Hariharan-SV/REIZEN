@@ -109,6 +109,8 @@ def view():
 
 @app.route('/user_history')
 def history():
+   if('user_id' not in session):
+      return redirect('/login')
    username=session['user_id']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
@@ -122,7 +124,7 @@ def history():
 @app.route('/bike_select',methods=['POST'])
 def stations():
     if('user_id' not in session):
-       return('Invalid Method')
+      return redirect('/login')
     if(request.method=='POST'):
         form=request.form
         s=form['station']
@@ -153,9 +155,10 @@ def displaybookedvehicle(np,bike):
          return redirect('/ride')
       else:
          mycursor.execute("SELECT otp,time FROM booking WHERE name=%s",(session['user_id'],))
-         otp=int(mycursor.fetchone()[0])
-         time=str(mycursor.fetchone()[1])
-         return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp,time=time)
+         value=mycursor.fetchone()
+         otp=int(value[0])
+         time_now=str(value[1])
+         return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp,time=time_now)
    else:
       otp=random.randrange(1000,9999,1)
       time_now=time.strftime('%d/%m/%y %H:%M:%S')
@@ -210,10 +213,14 @@ def agent_checktable():
 
 @app.route('/agent_main')
 def agent_mainpage():
+   if('agent' not in session):
+      return redirect('/agent_login')
    return render_template('agent_mainpage.html',name=session['agent'])
 
 @app.route('/recharge_cash',methods=['GET','POST'])
 def recharge():
+   if('agent' not in session):
+      return redirect('/agent_login')
    if(request.method == 'POST'):
       details=request.form
       username=details['user']
@@ -227,6 +234,8 @@ def recharge():
 
 @app.route('/agent_requests')
 def agent_requests():
+   if('agent' not in session):
+      return redirect('/agent_login')
    s=session['agent_station']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
@@ -240,6 +249,8 @@ def agent_requests():
 
 @app.route('/payment_processing')
 def payment_processing():
+   if('user_id' not in session):
+      return redirect('/login')
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
    mycursor.execute("SELECT * FROM trip WHERE name=%s",(session['user_id'],))
@@ -252,6 +263,8 @@ def payment_processing():
 
 @app.route('/update_booking/<username>')
 def update_user_validity(username):
+   if('agent' not in session):
+      return redirect('/agent_login')
    s=session['agent_station']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
@@ -278,6 +291,8 @@ def update_user_validity(username):
 
 @app.route('/end_ride/<station>/<distance>/<time1>')   #second-to-second update the position of the rider
 def ending_ride(station,distance,time1):
+   if('user_id' not in session):
+      return redirect('/login')
    time1=time1[-4:]
    sec=int(time1[2:])
    total_cost = int(distance) * 0.7 + sec * 0.5
@@ -297,7 +312,7 @@ def ending_ride(station,distance,time1):
 @app.route('/payment/<amount>')
 def payment(amount):
    if('user_id' not in session):
-      return 'Invalid method'
+      return redirect('/login')
    else:
       s=session['user_id']
       mydb = mysql.connector.connect(**config)
@@ -314,16 +329,22 @@ def payment(amount):
 
 @app.route('/two_mode')
 def payment_two_modes():
+   if('user_id' not in session):
+      return redirect('/login')
    username=session['user_id']
    return render_template('twomodepayment.html',name=username)
 
 @app.route('/one_mode')
 def payment_one_mode():
+   if('user_id' not in session):
+      return redirect('/login')
    username=session['user_id']
    return render_template('onemodepayment.html',name=username)
 
 @app.route('/agent_cash')
 def ack_cash():
+   if('agent' not in session):
+      return redirect('/agent_login')
    mydb=mysql.connector.connect(**config)
    mycursor=mydb.cursor()
    s=session['agent_station']
@@ -337,6 +358,8 @@ def ack_cash():
 
 @app.route('/agent_end/<tid>')
 def end_user_trip_by_agent(tid):
+   if('agent' not in session):
+      return redirect('/agent_login')
    mydb=mysql.connector.connect(**config)
    mycursor=mydb.cursor()
    try:
@@ -348,11 +371,14 @@ def end_user_trip_by_agent(tid):
 
 @app.route('/reduce_reizen_amount')
 def reducereizencash():
+   if('user_id' not in session):
+      return redirect('/login')
    username=session['user_id']
    amt=session['amt']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
    mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(amt,username,))
+   mycursor.execute("UPDATE trip SET mode='YES' WHERE name=%s",(username,))
    mydb.commit()
    return render_template('thankyou.html',name=username)
 
