@@ -15,6 +15,7 @@ import ast
 import json
 import random
 import math
+import datetime
 load_env()
 
 #config= os.environ.get('config')
@@ -161,7 +162,7 @@ def displaybookedvehicle(np,bike):
          return render_template('waitpage.html',name=session['user_id'],station=session['station'],numberplate=np,bike=bike,otp=otp,time=time_now)
    else:
       otp=random.randrange(1000,9999,1)
-      time_now=time.strftime('%d/%m/%y %H:%M:%S')
+      time_now=time.strftime('%y/%m/%d %H:%M:%S')
       mycursor.execute("UPDATE vehicles SET availabity='NO' WHERE number_plate=%s",(np,))
       mycursor.execute("INSERT INTO booking VALUES(%s,%s,%s,%s,%s,%s)",(session['user_id'],np,otp,time_now,"SINGLE","NO",))
       mydb.commit()
@@ -228,9 +229,8 @@ def recharge():
       mydb = mysql.connector.connect(**config)
       mycursor = mydb.cursor()
       mycursor.execute("UPDATE users SET amount=amount+%s WHERE name=%s",(int(amount),username,))
-      return render_template('recharge.html')
-   else:
-      return render_template('recharge.html')
+      mydb.commit()
+   return render_template('recharge.html')
 
 @app.route('/agent_requests')
 def agent_requests():
@@ -289,16 +289,22 @@ def update_user_validity(username):
    mycursor.close()
    return redirect('/agent_requests')
 
-@app.route('/end_ride/<station>/<distance>/<time1>')   #second-to-second update the position of the rider
+@app.route('/end_ride/<station>/<distance>/<time1>')
 def ending_ride(station,distance,time1):
    if('user_id' not in session):
       return redirect('/login')
-   time1=time1[-4:]
-   sec=int(time1[2:])
-   total_cost = int(distance) * 0.7 + sec * 0.5
-   session['amt']=total_cost
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
+   mycursor.execute("SELECT * FROM ride where name=%s",(session['user_id'],))
+   if(mycursor.fetchone() is None):
+      if('distance' in session and 'amt' in session and 'tripid' in session and 'np' in session and 'end_station' in session and 'station' in session and 'time' in session):
+         return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=session['amt'])
+      else:
+         return 'if you think that a problem occured here while ending your ride we apologise for your inconvienience'
+   time1=time1[-4:]
+   sec=int(time1[2:])
+   total_cost = int(distance) * 0.07 + sec * 0.5
+   session['amt']=total_cost
    mycursor.execute("SELECT name,number_plate,start_time from ride where name=%s",(session['user_id'],))
    data=mycursor.fetchone()
    end_time=time.strftime('%d/%m/%y %H:%M:%S')
@@ -306,13 +312,16 @@ def ending_ride(station,distance,time1):
    mydb.commit()
    mycursor.execute("DELETE FROM ride where name=%s",(session['user_id'],))
    mydb.commit()
-   mycursor.execute("SELECT trip_id FROM trip WHERE name=%s AND number_plate=%s AND start_time=%s AND end_time=%s AND start_station=%s AND end_station=%s AND distance=%s AND amount=%s AND mode=%s",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,total_cost,"NO",))
+   print(session['user_id'],data[1],data[2],time1)
+   mycursor.execute("SELECT trip_id FROM trip WHERE name=%s AND number_plate=%s AND start_time=%s AND end_time=%s",(session['user_id'],data[1],data[2],end_time,))
    tid=int(mycursor.fetchone()[0])
    session['tripid']=tid
-   session['np']=data[1]
+   session['np'] = data[1]
    session['end_station']=station
-   print(station,distance,time1)
-   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=distance,end_station=station,time=time1,amount=session['amt'])
+   session['distance'] = distance
+   session['time'] = time1
+   #print(station,distance,time1)
+   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=session['amt'])
 
 @app.route('/payment/<amount>')
 def payment(amount):
