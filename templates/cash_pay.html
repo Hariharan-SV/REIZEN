@@ -30,6 +30,7 @@
                               <tr>
                                     <th>Trip id</th>
                                     <th>Name</th>
+                                    <th>Number Plate</th>
                                     <th>Start station</th>
                                     <th>End station</th>
                                     <th>Amount</th>
@@ -78,7 +79,7 @@
             th,td{
                   padding-left: 2%;
                   padding-top: 2%;
-                  min-width:120px;
+                  min-width:110px;
                   text-align: center;
             }
             
@@ -88,8 +89,11 @@
                 var $row = $(this).closest("tr"),           // Finds the closest row <tr> 
                 $tds = $row.find("td"),               // Finds all children <td> elements
                 $tripid = $row.find("td:nth-child(1)").text();
-                console.log($tripid);
-                window.location.replace("http://localhost:2011/agent_end/"+$tripid);
+                $user = $row.find("td:nth-child(2)").text();
+                $np = $row.find("td:nth-child(3)").text();
+                $endstation = $row.find("td:nth-child(5)").text();
+                $amt = $row.find("td:nth-child(6)").text();
+                window.location.replace("http://localhost:2011/agent_end/"+$tripid+'/'+$user+'/'+$np+'/'+$endstation+'/'+$amt);
             });
             $(".use-address1").click(function() {
                     window.location.replace("http://localhost:2011/agent_main") 

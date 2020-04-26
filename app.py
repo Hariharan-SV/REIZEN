@@ -306,8 +306,13 @@ def ending_ride(station,distance,time1):
    mydb.commit()
    mycursor.execute("DELETE FROM ride where name=%s",(session['user_id'],))
    mydb.commit()
+   mycursor.execute("SELECT trip_id FROM trip WHERE name=%s AND number_plate=%s AND start_time=%s AND end_time=%s AND start_station=%s AND end_station=%s AND distance=%s AND amount=%s AND mode=%s",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,total_cost,"NO",))
+   tid=int(mycursor.fetchone()[0])
+   session['tripid']=tid
+   session['np']=data[1]
+   session['end_station']=station
    print(station,distance,time1)
-   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=distance,end_station=station,time=time1,amount=total_cost)
+   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=distance,end_station=station,time=time1,amount=session['amt'])
 
 @app.route('/payment/<amount>')
 def payment(amount):
@@ -350,23 +355,26 @@ def ack_cash():
    s=session['agent_station']
    mycursor.execute("SELECT station_name FROM station WHERE station_id=%s",(s,))
    stn=mycursor.fetchone()[0]
-   mycursor.execute("SELECT trip_id,name,start_station,end_station,amount FROM trip WHERE (mode='NO' AND end_station=%s)",(stn,))
+   mycursor.execute("SELECT trip_id,name,number_plate,start_station,end_station,amount FROM trip WHERE (mode='NO' AND end_station=%s)",(stn,))
    result=[]
    for x in mycursor:
       result.append(x)
    return render_template('cash_pay.html',table=result)
 
-@app.route('/agent_end/<tid>')
-def end_user_trip_by_agent(tid):
+@app.route('/agent_end/<tid>/<username>/<np>/<end_station>/<amt>')
+def end_user_trip_by_agent(tid,username,np,end_station,amt):
    if('agent' not in session):
       return redirect('/agent_login')
    mydb=mysql.connector.connect(**config)
    mycursor=mydb.cursor()
-   try:
-      mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(int(tid),))
-      mydb.commit()
-   except:
-      print("Failed")
+   mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(int(amt),username,))
+   mydb.commit()
+   mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=%s",(np,))
+   mydb.commit()
+   mycursor.execute("UPDATE location SET station_id=(SELECT station_id from station where station_name=%s) WHERE number_plate=%s",(end_station,np,))
+   mydb.commit()
+   mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(int(tid),))
+   mydb.commit()
    return redirect('/agent_cash')
 
 @app.route('/reduce_reizen_amount')
@@ -375,10 +383,13 @@ def reducereizencash():
       return redirect('/login')
    username=session['user_id']
    amt=session['amt']
+   tid=session['tripid']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
    mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(amt,username,))
-   mycursor.execute("UPDATE trip SET mode='YES' WHERE name=%s",(username,))
+   mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=%s",(session['np'],))
+   mycursor.execute("UPDATE location SET station_id=(SELECT station_id from station where station_name=%s) WHERE number_plate=%s",(session['end_station'],session['np'],))
+   mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(tid,))
    mydb.commit()
    return render_template('thankyou.html',name=username)
 
