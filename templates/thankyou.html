@@ -1,18 +1,38 @@
 <!DOCTYPE html>
-<head>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/util.css') }}"/>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
-</head>
-<body>
-    <div class="limiter">
-        <div class="container-login100">
-            <div class="wrap-login100">
-                <table>
+    <head>
+        <title>Thank you {{name}}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/favicon.ico') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/animate/animate.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/css-hamburgers/hamburgers.min.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/select2/select2.min.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/util.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
+    </head>
+    <body>
+        <div class="limiter">
+            <div class="container-login100">
+                <div class="wrap-login100">
                     <h1>Payment Processed Succesfully!</h1>
                     <h1>Have a great day, {{name}}</h1>
-                </table>
+                    <br>
+                    <button class="login100-form-btn use-address" >Back to main</button>
+                </div>
             </div>
         </div>
-    </div>
-</body>
+    </body>
+    <script src="{{ url_for('static', filename='vendor/jquery/jquery-3.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/tilt/tilt.jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js/') }}"></script>
+    <script>
+        $(".use-address").click(function() {
+                window.location.replace("http://localhost:2011/user_main_page")
+        });
+    </script>
 </html>
