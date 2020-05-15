@@ -30,6 +30,10 @@ config = {
 'database':database
 }
 
+names={"saravanampatti":[0,33],"kurudampalayam":[2,10],"ashokapuram":[3,16],"gks":[4,29],"thudiyalur":[5,4],"chinnavedampatti":[5,21],"kumarasamyavanue":[6,13],
+         "coimbatorenorth":[8,4],"koundampalayam":[8,8],"gandhipuram":[10,14],"ganapathy":[10,21],"neelambur":[10,33],"sivanandhacolony":[11,7],"saibabacolony":[12,1],"ganapathypudhur":[12,19],"womenspolytechnic":[14,16],
+         "rspuram":[16,0],"peelamedu":[16,24],"hopes":[16,30],"lakshmimills":[18,16],"gandhipark":[22,0],"annastatue":[19,10],"airport":[21,32],"railwaystation":[30,8],"fivecorner":[32,1],"ramanathapuram":[19,24],
+         "neelikonampalayam":[31,37],"ukkadam":[38,1],"singanallur":[38,21],"ondiputhur":[38,30]}
 otp=0
 SESSION_TYPE = 'memcache'
 
@@ -129,7 +133,7 @@ def stations():
     if(request.method=='POST'):
         form=request.form
         s=form['station']
-        session['station']=s
+        session['station']=s.lower()
         mydb = mysql.connector.connect(**config)
         mycursor = mydb.cursor()
         mycursor.execute("SELECT number_plate,model_name from vehicles WHERE availabity='YES' AND number_plate in (SELECT number_plate from location where station_id=(SELECT station_id from station where station_name=%s))",(s,))
@@ -147,6 +151,8 @@ def displaybookedvehicle(np,bike):
    mycursor = mydb.cursor()
    mycursor.execute("SELECT name FROM booking WHERE name=%s",(session['user_id'],))
    if(mycursor.fetchone() is not None):
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
       mycursor.execute("SELECT validity FROM booking WHERE name=%s",(session['user_id'],))
       validity=mycursor.fetchone()[0]
       if(validity=="YES"):
@@ -170,8 +176,31 @@ def displaybookedvehicle(np,bike):
 
 @app.route('/ride')
 def ridevehicle():
+   global names
    if('station' in session):
-      return render_template('ride.html',station=session['station'])
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT cur_latitude, cur_longtitude FROM ride WHERE name=%s",(session['user_id'],))
+      data=mycursor.fetchone()
+      return render_template('ride.html',x=data[1],y=data[0])
+   else:
+      return redirect('/login')
+
+@app.route('/report/<x>/<y>')
+def updateridetable(x,y):
+   if('station' in session):
+      print(x,y)
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT cur_latitude,cur_longtitude FROM ride where name=%s",(session['user_id'],))
+      data=mycursor.fetchone()
+      mycursor.execute("UPDATE ride SET prev_latitude=%s, prev_longtitude=%s WHERE name=%s",(data[0],data[1],session['user_id'],))
+      mydb.commit()
+      distance=abs(int(data[0])-int(x))+abs(int(data[1])-int(y))
+      mycursor.execute("UPDATE ride SET cur_latitude=%s, cur_longtitude=%s, distance=%s WHERE name=%s",(x,y,distance,session['user_id'],))
+      mydb.commit()
+      return "Success"
+
    else:
       return redirect('/login')
 
@@ -273,10 +302,7 @@ def update_user_validity(username):
       mydb.commit()
    except:
       print("Failed")
-   names={"saravanampatti":[0,33],"kurudampalayam":[2,10],"ashokapuram":[3,16],"gks":[4,29],"thudiyalur":[5,4],"chinnavedampatti":[5,21],"kumarasamyavanue":[6,13],
-         "coimbatorenorth":[8,4],"koundampalayam":[8,8],"gandhipuram":[10,14],"ganapathy":[10,21],"neelambur":[10,33],"sivanandhacolony":[11,7],"saibabacolony":[12,1],"ganapathypudhur":[12,19],"womenspolytechnic":[14,16],
-         "rspuram":[16,0],"peelamedu":[16,24],"hopes":[16,30],"lakshmimills":[18,16],"gandhipark":[22,0],"annastatue":[19,10],"airport":[21,32],"railwaystation":[30,8],"fivecorner":[32,1],"ramanathapuram":[19,24],
-         "neelikonampalayam":[31,37],"ukkadam":[38,1],"singanallur":[38,21],"ondiputhur":[38,30]}
+   global names
    mycursor.execute("SELECT station_name FROM station WHERE station_id=%s",(s,))
    s_name=mycursor.fetchone()[0]
    l1=list(names[s_name])
@@ -289,8 +315,8 @@ def update_user_validity(username):
    mycursor.close()
    return redirect('/agent_requests')
 
-@app.route('/end_ride/<station>/<distance>/<time1>')
-def ending_ride(station,distance,time1):
+@app.route('/end_ride/<station>/')
+def ending_ride(station):
    if('user_id' not in session):
       return redirect('/login')
    mydb = mysql.connector.connect(**config)
@@ -301,25 +327,29 @@ def ending_ride(station,distance,time1):
          return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=session['amt'])
       else:
          return 'if you think that a problem occured here while ending your ride we apologise for your inconvienience'
-   time1=time1[-4:]
-   sec=int(time1[2:])
-   total_cost = int(distance) * 0.07 + sec * 0.5
+   end_time= time.strftime('%y/%m/%d %H:%M:%S')
+   mycursor.execute("SELECT distance,start_time FROM ride WHERE name=%s",(session['user_id'],))
+   data=mycursor.fetchone()
+   distance = data[0]
+   secs = datetime.datetime.strptime(end_time,'%y/%m/%d %I:%M:%S') - datetime.datetime.strptime(str(data[1]),'%Y-%m-%d %I:%M:%S')
+   secs = int(secs.total_seconds())
+   print(secs,type(secs))
+   total_cost = int(distance) * 0.07 + int(secs) * 0.5
    session['amt']=total_cost
    mycursor.execute("SELECT name,number_plate,start_time from ride where name=%s",(session['user_id'],))
    data=mycursor.fetchone()
-   end_time=time.strftime('%d/%m/%y %H:%M:%S')
    mycursor.execute("INSERT INTO trip(name,number_plate,start_time,end_time,start_station,end_station,distance,amount,mode) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,total_cost,"NO",))
    mydb.commit()
    mycursor.execute("DELETE FROM ride where name=%s",(session['user_id'],))
    mydb.commit()
-   print(session['user_id'],data[1],data[2],time1)
+   print(session['user_id'],data[1],data[2],secs)
    mycursor.execute("SELECT trip_id FROM trip WHERE name=%s AND number_plate=%s AND start_time=%s AND end_time=%s",(session['user_id'],data[1],data[2],end_time,))
    tid=int(mycursor.fetchone()[0])
    session['tripid']=tid
    session['np'] = data[1]
    session['end_station']=station
    session['distance'] = distance
-   session['time'] = time1
+   session['time'] = secs
    #print(station,distance,time1)
    return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=session['amt'])
 
@@ -396,8 +426,11 @@ def reducereizencash():
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
    mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(amt,username,))
+   mydb.commit()
    mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=%s",(session['np'],))
+   mydb.commit()
    mycursor.execute("UPDATE location SET station_id=(SELECT station_id from station where station_name=%s) WHERE number_plate=%s",(session['end_station'],session['np'],))
+   mydb.commit()
    mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(tid,))
    mydb.commit()
    return render_template('thankyou.html',name=username)
