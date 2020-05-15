@@ -133,7 +133,8 @@
                 <div class="login100-pic">
                     <section>
                         <div id="wrapper" style="margin-left:auto; margin-right:auto;">
-                            <div id="nameofstation" style="display: none;"><h3 class="name">{{station}}</h3></div>
+                            <div id="xofstation" style="display: none;"><h3 class="name">{{x}}</h3></div>
+                            <div id="yofstation" style="display: none;"><h3 class="name">{{y}}</h3></div>
                             <h1 id="heading" style="margin-right:-115%;margin-bottom: 20%;background-color: #a59e9a; text-decoration-style: solid; color: #F8F8F8; width: 100%; margin-top: 0px; margin-bottom: 10px">Ride Simulator</h1>
                             <div id="maze">
                                 <div id="c" width="50%" style="margin-right:-115%;margin-bottom: 10%;text-align: center;width: 100%;font-size: large"></div>
@@ -281,7 +282,12 @@
                                     if (m.checker("canvas"))
                                         playing = false
                                     console.log(m.getMoves())
-
+                                    x=m.checkPos()[1]
+                                    y=m.checkPos()[0]
+                                    console.log("Changed: ",x,y);
+                                    $.get("/report/"+String(x)+"/"+String(y), function(data, status){
+                                        console.log("Data: " + data + "\nStatus: " + status);
+                                    });
                                 }
                                 if (handled)
                                     evt.preventDefault(); // prevent arrow keys from scrolling the page (supported in IE9+ and all other browsers)
@@ -312,9 +318,9 @@
                             } 
                             function random(min, max)      { return (min + (Math.random() * (max - min)));            };
                             function randomChoice(choices) { return choices[Math.round(random(0, choices.length-1))]; };
-                            var name=document.getElementById("nameofstation").querySelector('.name').innerHTML
-                            name=name.toLowerCase()
-                            console.log("name : ",name)
+                            var x=Number(document.getElementById("xofstation").querySelector('.name').innerHTML)
+                            var y=Number(document.getElementById("yofstation").querySelector('.name').innerHTML)
+                            console.log("x, y : ",x,y)
                             var endride=0;
                             var maze = function (X, Y) {
                                 this.N = X;
@@ -409,12 +415,10 @@
                                                 }
                                             }
                                         }
-                                        x=this.names[name]
-                                        console.log(x)
-                                        this.Board[x[1]][x[0]] = '&'
-                                        //this.Board[1] = '&';
+                                        console.log(x,y)
+                                        this.Board[x][y] = '&'
                                         this.ctx.fillStyle = "#c4192a";
-                                        this.ctx.fillRect(scale* x[1], scale * x[0], scale, scale);
+                                        this.ctx.fillRect(scale* x, scale * y, scale, scale);
                                     }
                                 };
 
@@ -533,7 +537,7 @@
                                         ans = getKeyByValue(this.names,j,i)
                                         console.log(ans)
                                         if(endride==1){
-                                            window.location.replace("http://localhost:2011/end_ride/"+ans+"/"+this.moves+"/"+$('#timerel').text());          
+                                            window.location.replace("http://localhost:2011/end_ride/"+ans);          
                                             return 1;
                                         }
                                     }else{
@@ -557,12 +561,12 @@
                         // drawMoves();
                         setInterval(drawMoves, 100);
                         function end(){
-                                endride=1;
-                                m.checker();
-                                if(endride==0){
-                                    console.log("You can end a ride only on a station")
-                                }
+                            endride=1;
+                            m.checker();
+                            if(endride==0){
+                                console.log("You can end a ride only on a station")
                             }
+                        }
 
                             //addEvents();
                         </script>
