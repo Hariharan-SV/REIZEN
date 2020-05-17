@@ -24,24 +24,28 @@
 <body>
 	
 	<div class="limiter">
-		<div class="container-login100">
-			<div class="wrap-login100">
-				<table>
-                    <tr>
-                        <td><h1> New trip </h1></td>
-                        <td>
-                            <button class="login100-form-btn use-address" >Start</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><h1> My History </h1></td>
-                        <td>
-                            <button class="login100-form-btn use-address1" >View</button>
-                        </td>
-                    </tr>
-                </table>
-			</div>
-		</div>
+            <div class="container-login100">
+                  <div class="wrap-login100">
+                        <table>
+                              <tr>
+                                    <td> <h1>Reizen Cash</h1></td>
+                                    <td> <h1>{{amount}}</h1></td>
+                              </tr>
+                              <tr>
+                                    <td><h1> New trip </h1></td>
+                                    <td>
+                                          <button class="login100-form-btn use-address" >Start</button>
+                                    </td>
+                              </tr>
+                              <tr>
+                                    <td><h1> My History </h1></td>
+                                    <td>
+                                          <button class="login100-form-btn use-address1" >View</button>
+                                    </td>
+                              </tr>
+                        </table>
+                  </div>
+            </div>
 	</div>
 	
 	
@@ -64,9 +68,23 @@
             }
             th,td{
                   padding-left: 5%;
-                  padding-top: 2%;
+                  padding-top: 4%;
                   min-width:350px;
                   text-align: center;
+            }
+            .wrap-login100 {
+                  width: 960px;
+                  background: #fff;
+                  border-radius: 10px;
+                  overflow: hidden;
+                  display: -webkit-box;
+                  display: -webkit-flex;
+                  display: -moz-box;
+                  display: -ms-flexbox;
+                  display: flex;
+                  flex-wrap: wrap;
+                  justify-content: space-between;
+                  padding: 50px 130px 100px 95px;
             }
             
       </style>

@@ -2,21 +2,63 @@
 <html>
 <head>
     <title>Processing request</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/favicon.ico') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/animate/animate.css') }}"/>
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/css-hamburgers/hamburgers.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/select2/select2.min.css') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/util.css') }}"/>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}"/>
+<!--===============================================================================================-->
 </head>
 <body>
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
-                <h1>Username: {{name}}</h1><br>
-                <h1>Number plate : {{numberplate}}</h1><br>
-                <h1>Station : {{station}}</h1><br>
-                <h1>Vehicle Model : {{bike}}</h1><br>
-                <h1>Booked Time : {{time}}</h1><br>
-                <h1>OTP : {{otp}}</h1><br>
+                <h1> Waiting for agent approval...</h1>
+                <br><br><br>
+                <table>
+                    <tr><td><h1>Username</h1></td><td><h2>{{name}}</h2></td></tr>
+                    <tr><td><h1>Number plate</h1></td><td><h2>{{numberplate}}</h2></td></tr>
+                    <tr><td><h1>Station</h1></td><td><h2>{{station}}</h2></td></tr>
+                    <tr><td><h1>Vehicle Model</h1></td><td><h2>{{bike}}</h2></td></tr>
+                    <tr><td><h1>Booked Time</h1></td><td><h2>{{time}}</h2></td></tr>
+                    <tr><td><h1>OTP</h1></td><td><h2>{{otp}}</h2></td></tr>
+                </table>
             </div>
         </div>
     </div>
-  
+    <style>
+         th,td{
+            padding-left: 2%;
+            padding-top: 2%;
+            min-width:150px;
+        }
+        .wrap-login100 {
+            width: 960px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 50px 130px 100px 95px;
+        }
+        
+  </style>
 </body>
 </html>
