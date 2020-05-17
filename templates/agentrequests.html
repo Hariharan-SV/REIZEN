@@ -30,18 +30,18 @@
                     <tr>
                         <th>Username</th>
                         <th>Number plate</th>
-                        <th>OTP</th>
                         <th>Time</th>
-                        <th>Trip mode</th>
                         <th>Validity</th>
+                        <th>OTP</th>
                     </tr>
                     {% for t in table %}
                     <tr>
                         {% for i in t %}
                             <td>{{ i }}</td>
                         {% endfor %}
+                        <td><input type="number" min="1000" max="9999" id="otp"></td>
                         <td>
-                            <button class="login100-form-btn use-address" >Grant</button>
+                        <button class="login100-form-btn use-address" >Grant</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -64,13 +64,6 @@
 <!--===============================================================================================-->
 	<script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
 <!--===============================================================================================-->
-	<script src="{{ url_for('static', filename='vendor/tilt/tilt.jquery.min.js') }}"></script>
-	<script >
-		$('.js-tilt').tilt({
-			scale: 1.1
-		})
-	</script>
-<!--===============================================================================================-->
 	<script src="{{ url_for('static', filename='js/main.js/') }}"></script>
       <style>
             table{
@@ -89,8 +82,9 @@
             var $row = $(this).closest("tr"),           // Finds the closest row <tr> 
                   $tds = $row.find("td"),               // Finds all children <td> elements
                   $Username = $row.find("td:nth-child(1)").text();
-                  console.log($Username);
-                  window.location.replace("http://localhost:2011/update_booking/"+$Username);
+                  $otp = $('#otp').val()
+                  console.log($Username,$otp);
+                  window.location.replace("http://localhost:2011/update_booking/"+$Username+"/"+$otp);
             });
             $(".use-address1").click(function() {
                     window.location.replace("/agent_main") 
