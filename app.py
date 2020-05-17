@@ -91,19 +91,23 @@ def checktable():
          message = Markup("<p>Sorry Invalid Username !</p>")
          flash(message)
          return redirect(url_for('login'))
-      mycursor.execute("SELECT password from users WHERE name =%s", (username,))
-      checker=mycursor.fetchone()[0]
+      mycursor.execute("SELECT password,amount from users WHERE name =%s", (username,))
+      checker=mycursor.fetchone()
       mycursor.close()
-      if(checker==password):
+      if(checker[0]==password):
          resp = make_response(render_template('login.html'))
-         session['user_id']=username
-         return redirect('/user_main_page')
+         session['user_id'] = username
+         session['reizen_cash'] = int(checker[1])
+         return redirect('/user_main')
       else:
          return 'Login Failed'
 
-@app.route('/user_main_page')
+@app.route('/user_main')
 def main_login_page():
-      return render_template('mainloginpage.html',name=session['user_id'] )
+   if(session is not None and 'user_id' in session and 'reizen_cash' in session):
+      return render_template('mainloginpage.html',name=session['user_id'], amount=session['reizen_cash'])
+   else:
+      return redirect('/login')
 
 @app.route('/pickup_station')
 def view():
@@ -197,7 +201,7 @@ def updateridetable(x,y):
       mycursor.execute("UPDATE ride SET prev_latitude=%s, prev_longtitude=%s WHERE name=%s",(data[0],data[1],session['user_id'],))
       mydb.commit()
       distance=abs(int(data[0])-int(x))+abs(int(data[1])-int(y))
-      mycursor.execute("UPDATE ride SET cur_latitude=%s, cur_longtitude=%s, distance=%s WHERE name=%s",(x,y,distance,session['user_id'],))
+      mycursor.execute("UPDATE ride SET cur_latitude=%s, cur_longtitude=%s, distance=distance+%s WHERE name=%s",(x,y,distance,session['user_id'],))
       mydb.commit()
       return "Success"
 
@@ -268,7 +272,7 @@ def agent_requests():
    s=session['agent_station']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
-   mycursor.execute("SELECT * FROM booking WHERE validity='NO' AND number_plate in (SELECT number_plate FROM location where station_id=%s)",(int(s),))
+   mycursor.execute("SELECT name,number_plate,time,validity FROM booking WHERE validity='NO' AND number_plate in (SELECT number_plate FROM location where station_id=%s)",(int(s),))
    result=[]
    for x in mycursor:
       result.append(list(x))
@@ -290,27 +294,32 @@ def payment_processing():
    else:
       return render_template('thankyou.html',name=session['user_id'])
 
-@app.route('/update_booking/<username>')
-def update_user_validity(username):
+@app.route('/update_booking/<username>/<otp>')
+def update_user_validity(username,otp):
    if('agent' not in session):
       return redirect('/agent_login')
    s=session['agent_station']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
+   mycursor.execute("SELECT otp from booking where name=%s",(username,))
+   data = mycursor.fetchone()
+   if( int(data[0]) != int(otp)):
+      return redirect('/agent_requests')
    try:
       mycursor.execute("UPDATE booking SET validity=%s WHERE name=%s",("YES",username,))
       mydb.commit()
    except:
-      print("Failed")
+      mydb.rollback()
+      return redirect('/update_booking/'+username+'/'+otp)
    global names
    mycursor.execute("SELECT station_name FROM station WHERE station_id=%s",(s,))
    s_name=mycursor.fetchone()[0]
    l1=list(names[s_name])
    lat=l1[0]
    longi=l1[1]
-   mycursor.execute("SELECT number_plate,time FROM booking WHERE name=%s",(username,))
+   mycursor.execute("SELECT number_plate FROM booking WHERE name=%s",(username,))
    result=mycursor.fetchone()
-   mycursor.execute("INSERT INTO ride(name,number_plate,start_time,prev_latitude,prev_longtitude,cur_latitude,cur_longtitude,distance,status) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(username,result[0],result[1],lat,longi,lat,longi,0,"NO",))
+   mycursor.execute("INSERT INTO ride(name,number_plate,start_time,prev_latitude,prev_longtitude,cur_latitude,cur_longtitude,distance,status) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(username,result[0],str(time.strftime('%y/%m/%d %H:%M:%S')),lat,longi,lat,longi,0,"NO",))
    mydb.commit()
    mycursor.close()
    return redirect('/agent_requests')
@@ -330,11 +339,11 @@ def ending_ride(station):
    end_time= time.strftime('%y/%m/%d %H:%M:%S')
    mycursor.execute("SELECT distance,start_time FROM ride WHERE name=%s",(session['user_id'],))
    data=mycursor.fetchone()
-   distance = data[0]
-   secs = datetime.datetime.strptime(end_time,'%y/%m/%d %I:%M:%S') - datetime.datetime.strptime(str(data[1]),'%Y-%m-%d %I:%M:%S')
+   distance = int(data[0])*10
+   secs = datetime.datetime.strptime(end_time,'%y/%m/%d %H:%M:%S') - datetime.datetime.strptime(str(data[1]),'%Y-%m-%d %H:%M:%S')
    secs = int(secs.total_seconds())
    print(secs,type(secs))
-   total_cost = int(distance) * 0.07 + int(secs) * 0.5
+   total_cost = int(distance) * 0.07 + int(secs) * 0.05
    session['amt']=total_cost
    mycursor.execute("SELECT name,number_plate,start_time from ride where name=%s",(session['user_id'],))
    data=mycursor.fetchone()
