@@ -40,6 +40,13 @@ SESSION_TYPE = 'memcache'
 app=Flask(__name__)
 app.static_folder='static'
 
+def clearsession():
+   temp=list(session.keys())
+   print(temp)
+   for key in temp:
+      if(key != 'user_id'):
+         print(key)
+         session.pop(key)
 
 @app.route('/login')
 def login():
@@ -104,7 +111,11 @@ def checktable():
 
 @app.route('/user_main')
 def main_login_page():
-   if(session is not None and 'user_id' in session and 'reizen_cash' in session):
+   if(session is not None and 'user_id' in session):
+      mydb = mysql.connector.connect(**config)
+      mycursor = mydb.cursor()
+      mycursor.execute("SELECT amount from users where name=%s",(session['user_id'],))
+      session['reizen_cash']=mycursor.fetchone()[0]
       return render_template('mainloginpage.html',name=session['user_id'], amount=session['reizen_cash'])
    else:
       return redirect('/login')
@@ -292,7 +303,26 @@ def payment_processing():
    if(data[len(data)-1][-1]=='NO'):
       return render_template('paymentwaiting.html')
    else:
+      clearsession()
       return render_template('thankyou.html',name=session['user_id'])
+
+@app.route('/delete_booking')
+def delete_booking():
+   if('station' not in session):
+      return redirect('/user_main')
+   if('user_id' not in session):
+      return redirect('/login')
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   try:
+      mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=(SELECT number_plate FROM booking WHERE name=%s)",(session['user_id'],))
+      mycursor.execute("DELETE FROM booking WHERE name=%s",(session['user_id'],))
+      mydb.commit()
+   except:
+      mydb.rollback()
+      return redirect('/delete_booking')
+   session['station']=None
+   return render_template('cancel_booking.html')
 
 @app.route('/update_booking/<username>/<otp>')
 def update_user_validity(username,otp):
@@ -415,8 +445,6 @@ def end_user_trip_by_agent(tid,username,np,end_station,amt):
       return redirect('/agent_login')
    mydb=mysql.connector.connect(**config)
    mycursor=mydb.cursor()
-   mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(int(amt),username,))
-   mydb.commit()
    mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=%s",(np,))
    mydb.commit()
    mycursor.execute("UPDATE location SET station_id=(SELECT station_id from station where station_name=%s) WHERE number_plate=%s",(end_station,np,))
@@ -442,6 +470,7 @@ def reducereizencash():
    mydb.commit()
    mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(tid,))
    mydb.commit()
+   clearsession()
    return render_template('thankyou.html',name=username)
 
 @app.errorhandler(404)
