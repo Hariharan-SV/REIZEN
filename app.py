@@ -458,11 +458,10 @@ def reducereizencash():
    if('user_id' not in session):
       return redirect('/login')
    username=session['user_id']
-   amt=session['amt']
    tid=session['tripid']
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
-   mycursor.execute("UPDATE users SET amount=amount-%s WHERE name=%s",(amt,username,))
+   mycursor.execute("UPDATE users SET amount=amount-(SELECT amount FROM trip where trip_id=%s) WHERE name=%s",(tid,username,))
    mydb.commit()
    mycursor.execute("UPDATE vehicles SET availabity='YES' WHERE number_plate=%s",(session['np'],))
    mydb.commit()
