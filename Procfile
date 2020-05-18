@@ -1,1 +1,1 @@
-web: gunicorn wsgi:Code
+web: gunicorn reizen:app
