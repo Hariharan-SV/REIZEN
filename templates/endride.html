@@ -32,10 +32,22 @@
             </div>
         </div>
     </div>
+    <style>
+            table{
+                  margin-top: 0;
+            }
+            th,td{
+                  padding-left: 5%;
+                  padding-top: 2%;
+                  min-width:200px;
+                  text-align: center;
+            }
+            
+      </style>
     <script type="text/javascript">
     document.getElementById("submit").onclick = function () {
         location.href = "https://reizen-app.herokuapp.com/payment/"+document.getElementById('amount').textContent;
     };
-</script>
+    </script>
 </body>
 </html>
