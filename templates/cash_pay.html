@@ -93,10 +93,10 @@
                 $np = $row.find("td:nth-child(3)").text();
                 $endstation = $row.find("td:nth-child(5)").text();
                 $amt = $row.find("td:nth-child(6)").text();
-                window.location.replace("http://localhost:2011/agent_end/"+$tripid+'/'+$user+'/'+$np+'/'+$endstation+'/'+$amt);
+                window.location.replace("https://reizen-app.herokuapp.com/agent_end/"+$tripid+'/'+$user+'/'+$np+'/'+$endstation+'/'+$amt);
             });
             $(".use-address1").click(function() {
-                    window.location.replace("http://localhost:2011/agent_main") 
+                    window.location.replace("https://reizen-app.herokuapp.com/agent_main") 
             });
       </script>
 </body>
