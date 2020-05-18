@@ -306,7 +306,7 @@ def payment_processing():
       return render_template('paymentwaiting.html')
    else:
       clearsession()
-      return render_template('thankyou.html',name=session['user_id'])
+      return redirect('/thankyou')
 
 @app.route('/delete_booking')
 def delete_booking():
@@ -470,7 +470,11 @@ def reducereizencash():
    mycursor.execute("UPDATE trip SET mode='YES' WHERE trip_id=%s",(tid,))
    mydb.commit()
    clearsession()
-   return render_template('thankyou.html',name=username)
+   return redirect('/thankyou')
+
+@app.route('/thankyou')
+def thankuser():
+      return render_template('thankyou.html',name=session['user_id'])
 
 @app.route('/logout')
 def logout():
