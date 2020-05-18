@@ -19,7 +19,14 @@
                     <h1>Payment Processed Succesfully!</h1>
                     <h1>Have a great day, {{name}}</h1>
                     <br><br><br>
-                    <button class="login100-form-btn use-address" >Back to main</button>
+                    <table>
+                        <tr>
+                            <td><button class="login100-form-btn use-address" >Back to main</button></td>
+                        </tr>
+                        <tr>
+                            <td><button class="login100-form-btn use-address1" >Logout</button></td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
@@ -33,6 +40,9 @@
     <script>
         $(".use-address").click(function() {
                 window.location.replace("https://reizen-app.herokuapp.com/user_main")
+        });
+        $(".use-address1").click(function() {
+                window.location.replace("https://reizen-app.herokuapp.com/logout")
         });
     </script>
 </html>
