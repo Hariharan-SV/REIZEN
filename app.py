@@ -39,6 +39,8 @@ SESSION_TYPE = 'memcache'
 
 app=Flask(__name__)
 app.static_folder='static'
+app.secret_key = os.environ.get('secret_key')
+app.config['SESSION_TYPE'] = 'filesystem'
 
 def clearsession():
    temp=list(session.keys())
@@ -478,6 +480,4 @@ def resource_not_found(e):
    return redirect(url_for('login'))
 
 if __name__ == '__main__':
-   app.secret_key = os.environ.get('secret_key')
-   app.config['SESSION_TYPE'] = 'filesystem'
-   app.run(debug=True,port=2011)
+   app.run()

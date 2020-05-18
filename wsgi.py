@@ -1,4 +1,4 @@
-from code.main import app 
+from reizen.app import app 
 
 if __name__ == "__main__": 
 	app.run() 
