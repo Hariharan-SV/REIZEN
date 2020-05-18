@@ -43,6 +43,11 @@
                                           <button class="login100-form-btn use-address1" >View</button>
                                     </td>
                               </tr>
+                              <tr>
+                                    <td>
+                                          <button class="login100-form-btn use-address2" >Logout</button>
+                                    </td>
+                              </tr>
                         </table>
                   </div>
             </div>
@@ -94,6 +99,9 @@
             });
             $(".use-address1").click(function() {
                     window.location.replace("https://reizen-app.herokuapp.com/user_history") 
+            });
+            $(".use-address1").click(function() {
+                    window.location.replace("https://reizen-app.herokuapp.com/logout") 
             });
       </script>
 </body>

@@ -8,12 +8,14 @@
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
-                <h1>Username: {{username}}</h1><br>
-                <h1>Start station : {{start_station}}</h1><br>
-                <h1 id="distance">Distance : {{distance}}</h1><br>
-                <h1 id="time">Time : {{time}}</h1><br>
-                <h1>End station : {{end_station}}</h1><br>
-                <h1 id="amount">{{amount}}</h1>
+                <table>
+                    <td><h1>Username</h1> </td><td><h1> {{username}}</h1></td>
+                    <td><h1>Start station</h1></td><td><h1> {{start_station}}</h1></td>
+                    <td><h1>Distance</h1></td><td><h1 id="distance">{{distance}}</h1></td>
+                    <td><h1>Time </h1></td><td><h1 id="time"> {{time}}</h1></td>
+                    <td><h1>End station </h1> </td><td><h1>{{end_station}}</h1></td>
+                    <td><h1>Amount</h1></td><td><h1 id="amount">{{amount}}</h1></td>
+                </table>
                 <button class="login100-form-btn" id="submit">End My Trip</button>
             </div>
         </div>

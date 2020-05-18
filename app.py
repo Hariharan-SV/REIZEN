@@ -376,7 +376,6 @@ def ending_ride(station):
    secs = int(secs.total_seconds())
    print(secs,type(secs))
    total_cost = int(distance) * 0.07 + int(secs) * 0.05
-   session['amt']=total_cost
    mycursor.execute("SELECT name,number_plate,start_time from ride where name=%s",(session['user_id'],))
    data=mycursor.fetchone()
    mycursor.execute("INSERT INTO trip(name,number_plate,start_time,end_time,start_station,end_station,distance,amount,mode) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(session['user_id'],data[1],data[2],end_time,session['station'],station,distance,total_cost,"NO",))
@@ -392,7 +391,7 @@ def ending_ride(station):
    session['distance'] = distance
    session['time'] = secs
    #print(station,distance,time1)
-   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=session['amt'])
+   return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=math.ceil(total_cost))
 
 @app.route('/payment/<amount>')
 def payment(amount):
@@ -475,9 +474,16 @@ def reducereizencash():
    clearsession()
    return render_template('thankyou.html',name=username)
 
+@app.route('/logout')
+def logout():
+      temp=list(session.keys())
+      for key in temp:
+            session.pop(key)
+      return redirect('/login')
+
 @app.errorhandler(404)
 def resource_not_found(e):
-   return redirect(url_for('login'))
+   return redirect('/login')
 
 if __name__ == '__main__':
    app.run()
