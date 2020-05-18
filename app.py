@@ -404,9 +404,8 @@ def payment(amount):
       mycursor.execute("SELECT amount FROM users WHERE name = %s",(s,))
       checker=mycursor.fetchone()[0]
       mycursor.close()
-      amt=amount[:-2]
       amt=math.ceil(float(amt))
-      if(int(checker)-amt > 500): #assuming 500 to be minimum balance
+      if(int(checker)-amt > 50): #assuming 50 to be minimum balance
          return redirect('/two_mode')
       else:
          return redirect('/one_mode')
