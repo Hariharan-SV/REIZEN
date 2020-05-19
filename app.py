@@ -351,6 +351,8 @@ def update_user_validity(username,otp):
    longi=l1[1]
    mycursor.execute("SELECT number_plate FROM booking WHERE name=%s",(username,))
    result=mycursor.fetchone()
+   mycursor.execute("UPDATE station SET vehicle_count=vehicle_count-1 WHERE station_id=%s",(session['agent_station'],))
+   mydb.commit()
    mycursor.execute("INSERT INTO ride(name,number_plate,start_time,prev_latitude,prev_longtitude,cur_latitude,cur_longtitude,distance,status) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ",(username,result[0],str(time.strftime('%y/%m/%d %H:%M:%S')),lat,longi,lat,longi,0,"NO",))
    mydb.commit()
    mycursor.close()
@@ -390,6 +392,8 @@ def ending_ride(station):
    session['end_station']=station
    session['distance'] = distance
    session['time'] = secs
+   mycursor.execute("UPDATE station SET vehicle_count=vehicle_count+1 WHERE station_id=(SELECT station_id FROM station where station_name=%s)",(session['end_station'],))
+   mydb.commit()
    #print(station,distance,time1)
    return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=math.ceil(total_cost))
 
