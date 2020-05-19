@@ -392,7 +392,9 @@ def ending_ride(station):
    session['end_station']=station
    session['distance'] = distance
    session['time'] = secs
-   mycursor.execute("UPDATE station SET vehicle_count=vehicle_count+1 WHERE station_id=(SELECT station_id FROM station where station_name=%s)",(session['end_station'],))
+   mycursor.execute("SELECT station_id FROM station where station_name=%s",(session['end_station'],))
+   checker = mycursor.fetchone()[0]
+   mycursor.execute("UPDATE station SET vehicle_count=vehicle_count+1 WHERE station_id=%s",(int(checker),))
    mydb.commit()
    #print(station,distance,time1)
    return render_template("endride.html",username=session['user_id'],start_station=session['station'],distance=session['distance'],end_station=session['end_station'],time=session['time'],amount=math.ceil(total_cost))
