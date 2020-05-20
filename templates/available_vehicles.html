@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title> Hi {{name}}!</title>
+	<title>Your history, dear {{name}}!</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -28,41 +28,19 @@
 			<div class="wrap-login100">
 				<table>
                               <tr>
-                                    <td><h3> Vehicles Available </h3></td>
-                                    <td>
-                                    <h3>{{vehicles}}</h3>
-                                    </td>
+                                    <th>Number Plate</th>
+                                    <th>Model</th>
                               </tr>
-                              <tr>
-                                    <td><h3> Validate Requests </h3></td>
-                                    <td>
-                                    <button class="login100-form-btn use-address" >Start</button>
-                                    </td>
-                              </tr>
-                              <tr>
-                                    <td><h3> End Rides </h3></td>
-                                    <td>
-                                    <button class="login100-form-btn use-address1" >Start</button>
-                                    </td>
-                              </tr>
-                              <tr>
-                                    <td><h3> Recharge REIZEN amount </h3></td>
-                                    <td>
-                                    <button class="login100-form-btn use-address2" >Start</button>
-                                    </td>
-                              </tr>
-                              <tr>
-                                    <td><h3> View available vehicles</h3></td>
-                                    <td>
-                                    <button class="login100-form-btn use-address4" >Start</button>
-                                    </td>
-                              </tr>
-                              <tr>
-                                    <td><h3>Logout</h3></td>
-                                    <td>
-                                          <button class="login100-form-btn use-address3" >Logout</button>
-                                    </td>
-                              </tr>
+                              {% for t in table %}
+                                    <tr>
+                                          {% for i in t %}
+                                          <td>{{ i }}</td>
+                                          {% endfor %}
+                                    </tr>
+                              {% endfor %}
+                              <td>
+                                    <button class="login100-form-btn use-address" >Go Back</button>
+                              </td>
                         </table>
 			</div>
 		</div>
@@ -80,6 +58,11 @@
 	<script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
 <!--===============================================================================================-->
 	<script src="{{ url_for('static', filename='vendor/tilt/tilt.jquery.min.js') }}"></script>
+	<script >
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
 <!--===============================================================================================-->
 	<script src="{{ url_for('static', filename='js/main.js/') }}"></script>
       <style>
@@ -87,28 +70,16 @@
                   margin-top: 0;
             }
             th,td{
-                  padding-left: 5%;
+                  padding-left: 0%;
                   padding-top: 2%;
-                  min-width:350px;
+                  min-width:120px;
                   text-align: center;
             }
             
       </style>
       <script>
             $(".use-address").click(function() {
-                    window.location.replace("https://reizen-app.herokuapp.com/agent_requests") 
-            });
-            $(".use-address1").click(function() {
-                    window.location.replace("https://reizen-app.herokuapp.com/agent_cash") 
-            });
-            $(".use-address2").click(function() {
-                    window.location.replace("https://reizen-app.herokuapp.com/recharge_cash") 
-            });
-            $(".use-address3").click(function() {
-                    window.location.replace("https://reizen-app.herokuapp.com/logout") 
-            });
-            $(".use-address4").click(function() {
-                    window.location.replace("https://reizen-app.herokuapp.com/vehicles_available") 
+                    window.location.replace("https://reizen-app.herokuapp.com/agent_main") 
             });
       </script>
 </body>

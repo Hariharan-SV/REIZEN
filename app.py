@@ -262,7 +262,25 @@ def agent_checktable():
 def agent_mainpage():
    if('agent' not in session):
       return redirect('/agent_login')
-   return render_template('agent_mainpage.html',name=session['agent'])
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mycursor.execute("SELECT vehicle_cnt from station where station_id=%s",(session['agent_station']))
+   vehicle_cnt = mycursor.fetchone()[0]
+   return render_template('agent_mainpage.html',name=session['agent'],vehicles=vehicle_cnt)
+
+@app.route('/vehicles_available')
+def show_vehicles():
+   if('agent' not in session):
+      return redirect('/agent_login')
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mydb = mysql.connector.connect(**config)
+   mycursor = mydb.cursor()
+   mycursor.execute("SELECT vehicles.number_plate,vehicles.model_name from vehicles join location on location.number_plate = vehicles.number_plate where location.station_id=%s and vehicles.availabity='YES')",(session['agent_station'],))
+   result=[]
+   for x in mycursor:
+      result.append(list(x))
+   return render_template('available_vehicles.html',table=result)
 
 @app.route('/recharge_cash',methods=['GET','POST'])
 def recharge():
