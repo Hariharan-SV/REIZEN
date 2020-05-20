@@ -264,7 +264,7 @@ def agent_mainpage():
       return redirect('/agent_login')
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
-   mycursor.execute("SELECT vehicle_count from station where station_id=%s",(session['agent_station']))
+   mycursor.execute("SELECT vehicle_count from station where station_id=%s",(session['agent_station'],))
    vehicle_cnt = mycursor.fetchone()[0]
    return render_template('agent_mainpage.html',name=session['agent'],vehicles=vehicle_cnt)
 
