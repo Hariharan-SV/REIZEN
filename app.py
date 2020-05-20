@@ -104,12 +104,12 @@ def checktable():
       checker=mycursor.fetchone()
       mycursor.close()
       if(checker[0]==password):
-         resp = make_response(render_template('login.html'))
          session['user_id'] = username
          session['reizen_cash'] = int(checker[1])
          return redirect('/user_main')
       else:
-         return 'Login Failed'
+         message = Markup("<p>Login Failed !</p>")
+         return redirect('/login')
 
 @app.route('/user_main')
 def main_login_page():
