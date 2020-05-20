@@ -276,7 +276,7 @@ def show_vehicles():
    mycursor = mydb.cursor()
    mydb = mysql.connector.connect(**config)
    mycursor = mydb.cursor()
-   mycursor.execute("SELECT vehicles.number_plate,vehicles.model_name from vehicles join location on location.number_plate = vehicles.number_plate where location.station_id=%s and vehicles.availabity='YES')",(session['agent_station'],))
+   mycursor.execute("SELECT vehicles.number_plate,vehicles.model_name from vehicles join location on location.number_plate = vehicles.number_plate where location.station_id=%s and vehicles.availabity='YES'",(session['agent_station'],))
    result=[]
    for x in mycursor:
       result.append(list(x))
