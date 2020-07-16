@@ -28,5 +28,5 @@ The app is deployed and you can find it [here](https://reizen-app.herokuapp.com/
    - recharge reizen cash for users
    
 ### Authors
- - Hariharan SV (https://github.com/hariharan20)
+ - Hariharan SV (https://github.com/Hariharan-SV)
  - Srinidi V (https://github.com/srinidi-v)
